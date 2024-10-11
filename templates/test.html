@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Test Results</h1>
+        
+        <div class="results-section">
+            <h2>Elbow Plot</h2>
+            {{ elbow_plot_html|safe }}
+        </div>
+        
+        <div class="results-section">
+            <h2>Cluster Plot</h2>
+            {{ cluster_plot_html|safe }}
+        </div>
+        
+        <div class="results-section">
+            <h2>Usage Plot</h2>
+            {{ usage_plot_html|safe }}
+        </div>
+        
+        <div class="results-section">
+            <h2>Data Table</h2>
+            <div class="table-container">
+                {{ table_html|safe }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
