@@ -7,26 +7,39 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <!-- Header Section -->
+    <header>
+        <div class="header-container">
+            <h1>Data Analysis Results</h1>
+            <p>Explore the results from your data analysis, including various plots and tables for better insights.</p>
+        </div>
+    </header>
+    
+    <!-- Main Content Section -->
     <div class="container">
-        <h1>Test Results</h1>
+        <h2 class="section-title">Test Results</h2>
         
-        <div class="results-section">
-            <h2>Elbow Plot</h2>
-            {{ elbow_plot_html|safe }}
+        <!-- Elbow Plot and Usage Plot (Left and Right) -->
+        <div class="results-section left-right">
+            <div class="results-section">
+                <h3>Elbow Plot</h3>
+                {{ elbow_plot_html|safe }}
+            </div>
+            <div class="results-section">
+                <h3>Usage Plot</h3>
+                {{ usage_plot_html|safe }}
+            </div>
         </div>
         
+        <!-- Cluster Plot Section -->
         <div class="results-section">
-            <h2>Cluster Plot</h2>
+            <h3>Cluster Plot</h3>
             {{ cluster_plot_html|safe }}
         </div>
         
+        <!-- Data Table Section -->
         <div class="results-section">
-            <h2>Usage Plot</h2>
-            {{ usage_plot_html|safe }}
-        </div>
-        
-        <div class="results-section">
-            <h2>Data Table</h2>
+            <h3>Data Table</h3>
             <div class="table-container">
                 {{ table_html|safe }}
             </div>
