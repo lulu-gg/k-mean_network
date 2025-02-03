@@ -34,8 +34,8 @@ def process_data(file_path_or_buffer, file_extension):
     else:
         data = pd.read_excel(file_path_or_buffer, engine='openpyxl')
 
-    # Pilih kolom yang relevan
-    selected_columns = ['Department', 'Sent/Received', 'Application']
+    # Pilih kolom yang relevan, tambahkan Username
+    selected_columns = ['Username', 'Department', 'Sent/Received', 'Application']
     data_selected = data[selected_columns].copy()
 
     # Membagi kolom 'Sent/Received'
@@ -58,7 +58,6 @@ def process_data(file_path_or_buffer, file_extension):
     # Encoding kategori
     le_department = LabelEncoder()
     le_application = LabelEncoder()
-
     data_selected['Department'] = le_department.fit_transform(data_selected['Department'])
     data_selected['Application'] = le_application.fit_transform(data_selected['Application'])
 
@@ -70,7 +69,7 @@ def process_data(file_path_or_buffer, file_extension):
     wcss = []
     max_clusters = min(10, len(data_selected))
     for i in range(1, max_clusters + 1):
-        kmeans = KMeans(n_clusters=i, random_state=42)
+        kmeans = KMeans(n_clusters=i, random_state=42, n_init=10)
         kmeans.fit(data_scaled)
         wcss.append(kmeans.inertia_)
 
@@ -105,7 +104,24 @@ def process_data(file_path_or_buffer, file_extension):
     usage_fig = px.bar(usage_counts, x='Usage', y='count', title='Usage Distribution')
     usage_plot_html = pio.to_html(usage_fig, full_html=False)
 
-    # Konversi dataframe ke HTML untuk ditampilkan
-    table_html = data_selected.to_html(classes='table table-striped')
+    # 📌 Total Sent and Received per category (Now in Bar Chart)
+    usage_totals = data_selected.groupby('Usage').agg({'Sent': 'sum', 'Received': 'sum'}).reset_index()
 
-    return elbow_plot_html, cluster_plot_html, usage_plot_html, table_html
+    usage_totals_fig = px.bar(
+        usage_totals, 
+        x='Usage', 
+        y=['Sent', 'Received'], 
+        title='Total Sent and Received Data by Usage Category',
+        barmode='group',
+        labels={'value': 'Data Usage (Bytes)', 'variable': 'Type'}
+    )
+    
+    # Konversi ke HTML agar bisa ditampilkan di template
+    usage_totals_html = pio.to_html(usage_totals_fig, full_html=False)
+
+    # 📌 Menampilkan Username dalam Data Table
+    table_html = data_selected[['Username', 'Department', 'Application', 'Sent', 'Received', 'Usage', 'Cluster']].to_html(classes='table table-striped')
+
+    # Perbaiki return agar `usage_totals_html` dikembalikan
+    return elbow_plot_html, cluster_plot_html, usage_plot_html, table_html, usage_totals_html
+

@@ -12,10 +12,11 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return 'No file part'
+        return render_template('index.html', message='No file part')
+    
     file = request.files['file']
     if file.filename == '':
-        return 'No selected file'
+        return render_template('index.html', message='No selected file')
     
     try:
         # Read the file into a memory buffer
@@ -35,25 +36,16 @@ def upload_file():
             pd.read_excel(excel_buffer, engine='openpyxl')
 
         # Call process_data function using buffer
-        elbow_plot_html, cluster_plot_html, usage_plot_html, table_html = process_data(excel_buffer, file_extension)
-        
-        # Debug prints
-        print("Elbow Plot HTML:")
-        print(elbow_plot_html)
-        print("Cluster Plot HTML:")
-        print(cluster_plot_html)
-        print("Usage Plot HTML:")
-        print(usage_plot_html)
-        print("Table HTML:")
-        print(table_html)
+        elbow_plot_html, cluster_plot_html, usage_plot_html, table_html, usage_totals_html = process_data(excel_buffer, file_extension)
         
         return render_template('test.html', 
                                elbow_plot_html=elbow_plot_html, 
                                cluster_plot_html=cluster_plot_html, 
                                usage_plot_html=usage_plot_html,
-                               table_html=table_html)
+                               table_html=table_html,
+                               usage_totals_html=usage_totals_html)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return render_template('index.html', message=f"Error: {str(e)}")
 
 if __name__ == '__main__':
     app.run(debug=True)
