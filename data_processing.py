@@ -25,7 +25,7 @@ def classify_usage(application):
         return 'Minor Cyberloafing'
     elif any(app in application_str for app in normal_apps):
         return 'Normal Usage'
-    return None  # Diubah ke None untuk mempermudah pengelompokan
+    return None
 
 def process_data(file_path_or_buffer, file_extension):
     # Membaca data dari file Excel
@@ -34,18 +34,18 @@ def process_data(file_path_or_buffer, file_extension):
     else:
         data = pd.read_excel(file_path_or_buffer, engine='openpyxl')
 
-    # Pilih kolom yang relevan, tambahkan Username
+    # Pilih kolom yang relevan
     selected_columns = ['Username', 'Department', 'Sent/Received', 'Application']
     data_selected = data[selected_columns].copy()
 
+    # Menyimpan nama asli Department dan Application sebelum encoding
+    data_selected['Department_Original'] = data_selected['Department']
+    data_selected['Application_Original'] = data_selected['Application']
+
     # Membagi kolom 'Sent/Received'
     sent_received_split = data_selected['Sent/Received'].str.split('/', expand=True)
-    data_selected['Sent'] = sent_received_split[0]
-    data_selected['Received'] = sent_received_split[1]
-
-    # Isi nilai NaN dengan '0B'
-    data_selected['Sent'] = data_selected['Sent'].fillna('0B')
-    data_selected['Received'] = data_selected['Received'].fillna('0B')
+    data_selected['Sent'] = sent_received_split[0].fillna('0B')
+    data_selected['Received'] = sent_received_split[1].fillna('0B')
 
     # Konversi ukuran menjadi angka
     data_selected['Sent'] = data_selected['Sent'].astype(str).apply(convert_size)
@@ -55,7 +55,7 @@ def process_data(file_path_or_buffer, file_extension):
     data_selected['Application'] = data_selected['Application'].astype(str)
     data_selected['Usage'] = data_selected['Application'].apply(classify_usage)
 
-    # Encoding kategori
+    # Encoding kategori hanya untuk keperluan standarisasi
     le_department = LabelEncoder()
     le_application = LabelEncoder()
     data_selected['Department'] = le_department.fit_transform(data_selected['Department'])
@@ -94,8 +94,14 @@ def process_data(file_path_or_buffer, file_extension):
         lambda row: cluster_to_usage[row['Cluster']] if row['Usage'] is None else row['Usage'], axis=1
     )
 
-    # Plot klaster
-    cluster_fig = px.scatter(data_selected, x='Department', y='Application', color='Cluster', title='Cluster Visualization')
+    # Plot klaster dengan angka seperti sebelumnya
+    cluster_fig = px.scatter(
+        data_selected, 
+        x='Department', 
+        y='Application', 
+        color='Cluster', 
+        title='Cluster Visualization'
+    )
     cluster_plot_html = pio.to_html(cluster_fig, full_html=False)
 
     # Plot distribusi Usage
@@ -119,9 +125,7 @@ def process_data(file_path_or_buffer, file_extension):
     # Konversi ke HTML agar bisa ditampilkan di template
     usage_totals_html = pio.to_html(usage_totals_fig, full_html=False)
 
-    # 📌 Menampilkan Username dalam Data Table
-    table_html = data_selected[['Username', 'Department', 'Application', 'Sent', 'Received', 'Usage', 'Cluster']].to_html(classes='table table-striped')
+    # 📌 Menampilkan Username dalam Data Table dengan nama asli Department & Application
+    table_html = data_selected[['Username', 'Department_Original', 'Application_Original', 'Sent', 'Received', 'Usage', 'Cluster']].to_html(classes='table table-striped')
 
-    # Perbaiki return agar `usage_totals_html` dikembalikan
     return elbow_plot_html, cluster_plot_html, usage_plot_html, table_html, usage_totals_html
-
