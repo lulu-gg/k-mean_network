@@ -126,6 +126,5 @@ def process_data(file_path_or_buffer, file_extension):
     usage_totals_html = pio.to_html(usage_totals_fig, full_html=False)
 
     # 📌 Menampilkan Username dalam Data Table dengan nama asli Department & Application
-    table_html = data_selected[['Username', 'Department_Original', 'Application_Original', 'Sent', 'Received', 'Usage', 'Cluster']].to_html(classes='table table-striped')
-
+    table_html = data_selected[['Username', 'Department_Original', 'Application_Original', 'Sent', 'Received', 'Usage', 'Cluster']].to_html(classes='table table-striped', index=False, table_id="data-table")
     return elbow_plot_html, cluster_plot_html, usage_plot_html, table_html, usage_totals_html
